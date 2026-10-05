@@ -1,0 +1,64 @@
+# Publishes the presentation to GitHub Pages.
+#
+# The deck is fully static and self-contained — Reveal.js and every asset are
+# vendored in this repository — so there is no build step. The workflow only
+# stages the site files (skipping the 9 MB press kit and the Markdown docs) and
+# hands them to the Pages deployment.
+#
+# One-time setup after the first push:
+#   repo -> Settings -> Pages -> Build and deployment -> Source: GitHub Actions
+# After that, every push to master republishes the deck.
+
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+# `pages: write` + `id-token: write` are required to publish; `contents: read` is
+# all the job needs from the repository itself.
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Never run two deployments at once — a newer push always wins.
+concurrency:
+  group: github-pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    name: Publish site
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Stage the site
+        run: |
+          mkdir -p _site
+          # Only what the browser needs. Paths stay relative, so the deck also
+          # works under a project subpath (/<repo>/).
+          cp -R index.html assets css reveal.js _site/
+          # Artifact uploads bypass Jekyll, but .nojekyll also keeps the site
+          # working if Pages is ever switched to "deploy from a branch".
+          touch _site/.nojekyll
+          echo "Staged $(find _site -type f | wc -l) files, $(du -sh _site | cut -f1)"
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

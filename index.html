@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Rust on ESP — first-class at Espressif</title>
+<meta name="description" content="Rust support for Espressif chips, and a quick start: espup, espflash, esp-generate.">
+<link rel="icon" type="image/svg+xml" href="assets/espressif-mark.svg">
+
+<link rel="stylesheet" href="reveal.js/dist/reset.css">
+<link rel="stylesheet" href="reveal.js/dist/reveal.css">
+<link rel="stylesheet" href="css/espressif-dark.css">
+</head>
+<body>
+<div class="reveal">
+<div class="slides">
+
+<!-- ══════════════════════════════════ 1 · TITLE ══════════════════════════════════ -->
+<section class="title-slide">
+  <img src="assets/espressif-logo-on-black.svg" alt="Espressif" style="height:46px;margin-bottom:1.1em">
+  <h1><span class="rust-accent">Rust</span> on ESP</h1>
+  <p class="subtitle">A first-class citizen at Espressif —<br>and three commands from zero to a blinking LED</p>
+  <p style="margin-top:1.15em"><span class="pill">github.com/esp-rs</span></p>
+  <aside class="notes">
+    Quick framing before we start. Two promises: One, that Rust is taken seriously at Espressif, not a
+    hobby project. Two, that by the end you know the exact three commands that get you from nothing to
+    a running firmware. Nothing else. If you only remember one slide, remember the last one.
+  </aside>
+</section>
+
+<!-- ══════════════════════════════════ 2 · STATUS ══════════════════════════════════ -->
+<section>
+  <span class="eyebrow">Where things stand</span>
+  <h2>Rust is a first-class citizen</h2>
+  <div class="cols" style="margin-top:0.9em">
+    <div class="stack">
+      <p style="font-size:0.56em">Not a community experiment, not a wrapper around C. Espressif
+      officially supports Rust as a first-class development language, alongside ESP-IDF.</p>
+      <ul style="font-size:0.52em">
+        <li>Own HAL, own drivers, own tooling — built and maintained for ESP chips</li>
+        <li>Stable API, not pre-v1-releases</li>
+        <li>Documented, versioned, and released alongside the silicon</li>
+      </ul>
+    </div>
+    <div class="card">
+      <span class="tag">The honest caveat</span>
+      <h3>It trails the C SDK slightly</h3>
+      <p class="card-body">ESP-IDF is the reference SDK. It reaches new chips and new peripheral
+      features first, and it has the deepest example coverage.</p>
+    </div>
+  </div>
+  <aside class="notes">
+    Lets say the caveat out loud — ESP-IDF is the reference SDK, and it will always be first to a new
+    chip or a brand-new peripheral. Rust is a little behind that frontier.
+  </aside>
+</section>
+
+<!-- ══════════════════════════════════ 3 · CHOOSE ══════════════════════════════════ -->
+<section>
+  <span class="eyebrow">So which one?</span>
+  <h2>Pick the boring answer</h2>
+  <div class="versus" style="margin-top:0.7em">
+    <div class="card">
+      <span class="tag">Cutting edge</span>
+      <h3>ESP-IDF (C)</h3>
+      <p class="card-body">You need a peripheral or chip feature that shipped last week, or you are
+      porting vendor middleware. Go here first.</p>
+    </div>
+    <div class="divider">OR</div>
+    <div class="card accent">
+      <span class="tag">Everything else</span>
+      <h3>Rust</h3>
+      <p class="card-body">For the overwhelming majority of projects, Rust is simply the better
+      tool — and it is genuinely production-ready today.</p>
+    </div>
+  </div>
+  <p style="margin-top:0.9em;font-size:0.5em;color:var(--esp-text-dim)">
+    The gap is measured in months, not years — and it closes with every chip release.
+  </p>
+  <aside class="notes">
+    Rule of thumb: if you are chasing a datasheet feature from this quarter, use ESP-IDF. For
+    everything else, Rust is not a compromise — it is the better default.
+  </aside>
+</section>
+
+<!-- ══════════════════════════════════ 4 · PROS ══════════════════════════════════ -->
+<section>
+  <span class="eyebrow">Why you'd choose it</span>
+  <h2>What you actually get</h2>
+  <div class="cols-3" style="margin-top:0.8em">
+    <div class="card">
+      <span class="tag">Safety</span>
+      <h3>No memory bugs</h3>
+      <p class="card-body">Ownership and borrow checking kill the buffer overflows and use-after-free
+      that dominate embedded CVEs.</p>
+    </div>
+    <div class="card">
+      <span class="tag">Tooling</span>
+      <h3>Cargo does the work</h3>
+      <p class="card-body">Dependencies, builds, tests, docs, linting and cross-compilation — one
+      tool, no hand-rolled Makefiles.</p>
+    </div>
+    <div class="card">
+      <span class="tag">Scale</span>
+      <h3>Async that fits</h3>
+      <p class="card-body">Embassy gives you <code>async</code> on a microcontroller, so Wi-Fi and
+      sensors stop fighting each other.</p>
+    </div>
+  </div>
+  <p style="margin-top:0.9em;font-size:0.46em;color:var(--esp-text-faint)">
+    Plus: the type system catches a whole class of logic errors at compile time, and the crate ecosystem
+    is shared with the rest of Rust — not reinvented per vendor.
+  </p>
+  <aside class="notes">
+    Three benefits, one breath each. For the C people: you stop owning the memory-safety argument. For
+    the Rust people: Cargo plus a real crate ecosystem full of no_std ready linraries for lot of sensors and other parts.
+    And async is the one that actually changes how you write firmware — Wi-Fi and sensor work stop being callbacks.
+  </aside>
+</section>
+
+<!-- ══════════════════════════════════ 5 · DIVIDER ══════════════════════════════════ -->
+<section class="section-slide">
+  <div class="num-big">02</div>
+  <h2>Getting started</h2>
+  <p class="section-sub">Three steps: toolchain, flasher, project generator.</p>
+  <aside class="notes">
+    Halfway point.
+    Everything so far was context, everything from here is something you can type tonight.
+    Three moving parts — toolchain, flasher, generator.
+  </aside>
+</section>
+
+<!-- ══════════════════════════════════ 6 · TOOLCHAIN ══════════════════════════════════ -->
+<section>
+  <span class="eyebrow">Step 1 · Toolchain</span>
+  <h2>You already have the hard part</h2>
+  <p style="font-size:0.52em;color:var(--esp-text-dim)">
+    Assume <code>rustup</code> is installed. If it isn't, <a href="https://rustup.rs" target="_blank">rustup.rs</a>
+    is one command — but from here on, Rust just works.
+  </p>
+  <div class="cols" style="margin-top:0.85em">
+    <div class="card accent">
+      <span class="tag">RISC-V parts</span>
+      <h3>Mainline Rust — you're done</h3>
+      <p class="card-body">The C-series, H-series and P-series are standard RISC-V. A normal stable
+      Rust toolchain targets them. No extra install.</p>
+    </div>
+    <div class="card">
+      <span class="tag">Xtensa parts</span>
+      <h3>You need <a href="https://github.com/esp-rs/espup" target="_blank">espup</a></h3>
+      <p class="card-body">Xtensa has no upstream LLVM backend, so espup builds and installs the
+      toolchain for you.</p>
+    </div>
+  </div>
+  <pre style="margin-top:0.8em"><code><span class="cmd">$</span> cargo install espup --locked
+<span class="cmd">$</span> espup install
+<span class="cmd">$</span> <span class="cmt"># then, in every new shell:</span> . $HOME/export-esp.sh</code></pre>
+  <aside class="notes">
+    The single most common question, so answer it precisely. RISC-V is standard, so stable Rust
+    handles it and you need nothing extra. Xtensa is not an upstream, so espup installs
+    a purpose-built toolchain. espup does everything — you just run it.
+  </aside>
+</section>
+
+<!-- ══════════════════════════════════ 7 · FLASHING ══════════════════════════════════ -->
+<section>
+  <span class="eyebrow">Step 2 · Flashing</span>
+  <h2>Getting code onto the chip</h2>
+  <div class="cols" style="margin-top:0.7em">
+    <div class="card">
+      <span class="tag">Option A</span>
+      <h3>esptool.py</h3>
+      <p class="card-body">The one that ships with ESP-IDF. If you already have IDF installed, it is
+      right there and it works fine.</p>
+    </div>
+    <div class="card accent">
+      <span class="tag">Option B</span>
+      <h3>cargo-espflash</h3>
+      <p class="card-body">Pure Rust, lives next to <code>cargo build</code>, and gives you a
+      monitor as well as a flasher.</p>
+    </div>
+  </div>
+  <pre style="margin-top:0.85em"><code><span class="cmd">$</span> cargo install cargo-espflash --locked
+
+<span class="cmt"># board-info, monitor, erase, read-flash, save-image — the whole serial toolchain</span>
+<span class="cmd">$</span> cargo espflash board-info</code></pre>
+  <aside class="notes">
+    Both are legitimate. If IDF is already on your machine, esptool is right there — no reason to
+    change. But cargo-espflash is nicer because it lives in the same mental model as cargo build,
+    and board-info is the first thing to run when unsure what board you are holding.
+  </aside>
+</section>
+
+<!-- ══════════════════════════════════ 8 · GENERATE ══════════════════════════════════ -->
+<section>
+  <span class="eyebrow">Step 3 · Project</span>
+  <h2>esp-generate does the scaffolding</h2>
+  <p style="font-size:0.52em;color:var(--esp-text-dim)">
+    The easiest way in. A terminal wizard asks a handful of questions and writes you a real,
+    buildable project.
+  </p>
+  <pre style="margin-top:0.7em"><code><span class="cmd">$</span> cargo install esp-generate --locked
+<span class="cmd">$</span> esp-generate</code></pre>
+  <div class="cols-3" style="margin-top:0.7em">
+    <div class="card">
+      <h3>Sync or async</h3>
+      <p class="card-body">Plain blocking code, or <code>embassy</code> <code>async</code> — your call.</p>
+    </div>
+    <div class="card">
+      <h3>Target chip</h3>
+      <p class="card-body">Any supported ESP SoC, selected from a list.</p>
+    </div>
+    <div class="card accent">
+      <h3>Wi-Fi init</h3>
+      <p class="card-body">Optional radio bring-up, wired in from the start.</p>
+    </div>
+  </div>
+  <aside class="notes">
+    Let me be clear, you are still cross-compiling and setting up the project so cargo knows exactly what to do may be a
+    pain. esp-generate solves that for you. One command, and you have a compiling, flashable
+    project with the right target triple and the right HAL already wired. Sync or async is a menu
+    choice, and Wi-Fi initialisation is a checkbox. If people want scripting, there is a headless
+    mode with -o flags — so even you AI agents will quickly learn how to use this.
+  </aside>
+</section>
+
+<!-- ══════════════════════════════════ 9 · BUILD+FLASH ══════════════════════════════════ -->
+<section>
+  <span class="eyebrow">Step 4 · Ship it</span>
+  <h2>Build, flash, done</h2>
+  <pre><code><span class="cmd">$</span> cargo build --release
+<span class="cmd">$</span> cargo espflash flash --release
+<span class="cmd">$</span> cargo espflash monitor</code></pre>
+  <p style="margin-top:0.9em;font-size:0.5em;color:var(--esp-text-dim)">
+    Same verbs you already use for every other Rust project — just pointed at a microcontroller
+    instead of a server.
+  </p>
+  <aside class="notes">
+    The loop closes. Cargo build, flash, monitor. No Makefile, no CMake, no separate flashing
+    script, no second toolchain to learn. If you have written Rust before, you already know how to
+    do all of this — that is the entire point.
+  </aside>
+</section>
+
+<!-- ══════════════════════════════════ 10 · RECAP ══════════════════════════════════ -->
+<section>
+  <span class="eyebrow">The whole thing</span>
+  <h2>Three commands</h2>
+  <div class="commands" style="margin-top:0.8em">
+    <div class="line"><span class="n">1</span><span class="c"><b>esp-generate</b> &nbsp;<span style="color:var(--esp-text-faint)">&nbsp;← scaffold the project</span></span></div>
+    <div class="line"><span class="n">2</span><span class="c"><b>cargo build</b> &nbsp;<span style="color:var(--esp-text-faint)">&nbsp;← compile the firmware</span></span></div>
+    <div class="line"><span class="n">3</span><span class="c"><b>cargo espflash flash</b> &nbsp;<span style="color:var(--esp-text-faint)">&nbsp;← write it to the chip</span></span></div>
+  </div>
+  <p style="margin-top:1.1em;font-size:0.54em;color:var(--esp-text-dim)">
+    Rust on ESP is as easy as <span style="color:var(--esp-white)">esp-generate</span>,
+    <span style="color:var(--esp-white)">cargo build</span> and
+    <span style="color:var(--esp-white)">cargo espflash flash</span>.
+  </p>
+  <p style="margin-top:0.9em;font-size:0.6em">
+    <span style="color:var(--esp-white)">If you should remember anything, remember this slide.</span><br>
+    <span style="color:var(--esp-red)">Thank you for your attention — questions welcome.</span>
+  </p>
+  <aside class="notes">
+    If the toolchain is already installed, the entire getting-started
+    experience is these three commands. That is the whole pitch. One thing to take away is this slide.
+  </aside>
+</section>
+
+</div>
+</div>
+
+<img class="footer-logo" src="assets/espressif-mark.svg" alt="">
+
+<script src="reveal.js/dist/reveal.js"></script>
+<script src="reveal.js/plugin/notes/notes.js"></script>
+<script src="reveal.js/plugin/search/search.js"></script>
+<script src="reveal.js/plugin/zoom/zoom.js"></script>
+<script>
+  // NOTE: the highlight plugin is deliberately NOT loaded. Code blocks in this
+  // deck are hand-styled with .cmd / .cmt spans, and highlightBlock() would
+  // escape that markup and render the tags as literal text.
+  Reveal.initialize({
+    width: 1280,
+    height: 720,
+    margin: 0.06,
+    minScale: 0.2,
+    maxScale: 1.6,
+    hash: true,
+    slideNumber: 'c/t',
+    transition: 'slide',
+    transitionSpeed: 'fast',
+    backgroundTransition: 'fade',
+    center: true,
+    pdfSeparateFragments: false,
+    plugins: [ RevealNotes, RevealSearch, RevealZoom ]
+  });
+</script>
+</body>
+</html>

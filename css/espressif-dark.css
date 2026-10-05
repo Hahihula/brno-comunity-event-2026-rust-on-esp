@@ -1,0 +1,428 @@
+/**
+ * Espressif dark theme for Reveal.js
+ * ---------------------------------------------------------
+ * Brand colours taken from the official Espressif logo artwork and
+ * the Espressif Logo Guidelines (black is a brand colour; on a solid
+ * black background the logo uses a red logo mark + white word mark).
+ *
+ *   Espressif red   #E8362D   (logo mark / primary accent)
+ *   Deep red        #C33425   (accessible red for text on dark)
+ *   White           #FFFFFF   (word mark)
+ *
+ * Derived neutrals are intentionally slightly warm/neutral so the red
+ * stays the only saturated element on screen.
+ */
+
+:root {
+  --esp-red: #e8362d;
+  --esp-red-deep: #c33425;
+  --esp-red-dim: #7d1f1b;
+  --esp-white: #ffffff;
+  --esp-black: #000000;
+
+  --esp-bg: #0a0a0b;
+  --esp-surface: #141416;
+  --esp-surface-2: #1c1c1f;
+  --esp-border: #2a2a2e;
+  --esp-text: #f2f2f3;
+  --esp-text-dim: #a1a1a8;
+  --esp-text-faint: #6e6e76;
+}
+
+/* Base ------------------------------------------------------------- */
+
+.reveal-viewport {
+  background: var(--esp-black);
+}
+
+.reveal {
+  font-family: "Inter", "Helvetica Neue", Helvetica, "Segoe UI", Roboto, system-ui, sans-serif;
+  font-size: 37px;
+  font-weight: 400;
+  color: var(--esp-text);
+  -webkit-font-smoothing: antialiased;
+}
+
+.reveal ::selection {
+  background: var(--esp-red);
+  color: var(--esp-white);
+}
+
+.reveal h1,
+.reveal h2,
+.reveal h3,
+.reveal h4,
+.reveal h5,
+.reveal h6 {
+  font-family: inherit;
+  color: var(--esp-white);
+  text-transform: none;
+  letter-spacing: -0.02em;
+  line-height: 1.12;
+  margin: 0 0 0.6em 0;
+  text-shadow: none;
+  font-weight: 700;
+}
+
+.reveal h1 { font-size: 2.1em; }
+.reveal h2 { font-size: 1.62em; }
+.reveal h3 { font-size: 1.22em; }
+
+.reveal p { margin: 0 0 0.7em 0; line-height: 1.45; }
+.reveal strong { color: var(--esp-white); font-weight: 700; }
+.reveal em { color: var(--esp-text-dim); font-style: italic; }
+.reveal a { color: var(--esp-red); text-decoration: none; border-bottom: 1px solid rgba(232, 54, 45, 0.35); }
+.reveal a:hover { color: #ff6b62; border-bottom-color: #ff6b62; }
+.reveal small { font-size: 0.62em; color: var(--esp-text-faint); line-height: 1.4; }
+
+/* Slide scaffolding ------------------------------------------------- */
+
+/* Content padding.
+   Vertical centring is delegated to Reveal's own `center: true` option — it
+   injects a runtime stylesheet that sets `display` on the slide element, so a
+   local flex rule here is silently overridden (flex properties apply, `display`
+   does not). */
+.reveal .slides > section {
+  text-align: left;
+  padding: 0 0.4em;
+  box-sizing: border-box;
+}
+
+/* Eyebrow / kicker text */
+.reveal .eyebrow {
+  display: block;
+  font-size: 0.44em;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--esp-red);
+  margin-bottom: 0.55em;
+}
+
+.reveal .lede {
+  font-size: 0.72em;
+  color: var(--esp-text-dim);
+  line-height: 1.5;
+  max-width: 22em;
+}
+
+/* Footer: logo mark + slide number.
+   The <img> is a sibling of .reveal (Reveal re-parents it into
+   .reveal-viewport), so this must NOT be scoped under .reveal. */
+.footer-logo {
+  position: fixed;
+  left: 30px;
+  bottom: 24px;
+  height: 24px;
+  width: auto;
+  opacity: 0.75;
+  z-index: 30;
+  pointer-events: none;
+}
+
+.reveal .slide-number {
+  background: transparent;
+  color: var(--esp-text-faint);
+  font-size: 15px;
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  right: 64px;
+  bottom: 22px;
+  left: auto;
+  padding: 0;
+}
+
+.reveal .slide-number a,
+.reveal .slide-number a:hover { color: var(--esp-text-faint); border: none; }
+
+/* Layout helpers ---------------------------------------------------- */
+
+.reveal .cols {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2.4em;
+  align-items: start;
+}
+
+.reveal .cols-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.4em;
+  align-items: stretch;
+}
+
+.reveal .stack { display: flex; flex-direction: column; gap: 0.75em; }
+.reveal .center { text-align: center; }
+.reveal .grow { flex: 1 1 auto; }
+
+/* Cards -------------------------------------------------------------- */
+
+.reveal .card {
+  background: var(--esp-surface);
+  border: 1px solid var(--esp-border);
+  border-radius: 10px;
+  padding: 1em 1.1em;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35em;
+  text-align: left;
+}
+
+.reveal .card.accent {
+  border-color: rgba(232, 54, 45, 0.55);
+  background: linear-gradient(180deg, rgba(232, 54, 45, 0.12), rgba(232, 54, 45, 0.02));
+}
+
+.reveal .card h3 {
+  margin: 0;
+  font-size: 0.62em;
+  letter-spacing: 0.01em;
+}
+
+.reveal .card .card-body {
+  font-size: 0.47em;
+  color: var(--esp-text-dim);
+  line-height: 1.45;
+  margin: 0;
+}
+
+.reveal .card .tag {
+  font-size: 0.36em;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--esp-red);
+}
+
+/* Bulleted lists ----------------------------------------------------- */
+
+.reveal ul, .reveal ol { display: block; margin: 0 0 0.6em 0; }
+
+.reveal ul li {
+  list-style: none;
+  margin: 0 0 0.62em 0;
+  padding-left: 1.15em;
+  position: relative;
+  line-height: 1.42;
+}
+
+.reveal ul li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.52em;
+  width: 7px;
+  height: 7px;
+  border-radius: 2px;
+  background: var(--esp-red);
+}
+
+.reveal ol li { margin: 0 0 0.62em 0; line-height: 1.42; }
+
+.reveal ul ul li::before {
+  background: transparent;
+  border: 2px solid var(--esp-text-faint);
+  border-radius: 2px;
+  width: 5px;
+  height: 5px;
+  top: 0.55em;
+}
+
+.reveal ul ul { margin-top: 0.55em; }
+.reveal ul ul li { font-size: 0.88em; color: var(--esp-text-dim); }
+
+/* Code ---------------------------------------------------------------- */
+
+.reveal pre {
+  background: var(--esp-surface);
+  border: 1px solid var(--esp-border);
+  border-left: 3px solid var(--esp-red);
+  border-radius: 8px;
+  padding: 0.85em 1.05em;
+  font-size: 0.5em;
+  line-height: 1.5;
+  box-shadow: none;
+  width: 100%;
+  box-sizing: border-box;
+  margin: 0.5em 0;
+  overflow: hidden;
+}
+
+.reveal code {
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+  background: transparent;
+  padding: 0;
+  color: var(--esp-text);
+  font-size: 1em;
+}
+
+.reveal p code, .reveal li code, .reveal td code {
+  background: var(--esp-surface-2);
+  border: 1px solid var(--esp-border);
+  border-radius: 4px;
+  padding: 0.08em 0.34em;
+  color: #ffb3ad;
+  font-size: 0.86em;
+  white-space: nowrap;
+}
+
+.reveal pre code { background: transparent; border: none; padding: 0; color: var(--esp-text); }
+
+/* Basic syntax colours (works with or without the highlight plugin) */
+.reveal .hljs-comment, .reveal .hljs-quote { color: var(--esp-text-faint); font-style: italic; }
+.reveal .hljs-keyword, .reveal .hljs-selector-tag, .reveal .hljs-literal { color: #ff8b82; }
+.reveal .hljs-string, .reveal .hljs-attr { color: #9ee493; }
+.reveal .hljs-number, .reveal .hljs-symbol { color: #ffc777; }
+.reveal .hljs-title, .reveal .hljs-title.function_, .reveal .hljs-section { color: #86d0ff; }
+.reveal .hljs-built_in, .reveal .hljs-type { color: #c9a7ff; }
+.reveal .hljs-meta { color: var(--esp-text-faint); }
+.reveal .hljs-prompt, .reveal .hljs-meta .hljs-keyword { color: var(--esp-red); font-weight: 700; }
+
+/* Command / shell prompt highlighting inside <pre> */
+.reveal .cmd { color: var(--esp-red); font-weight: 700; }
+.reveal .cmt { color: var(--esp-text-faint); font-style: italic; }
+
+/* Link pills ---------------------------------------------------------- */
+
+.reveal .pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45em;
+  border: 1px solid var(--esp-border);
+  background: var(--esp-surface);
+  border-radius: 999px;
+  padding: 0.32em 0.85em;
+  font-size: 0.42em;
+  color: var(--esp-text);
+  margin: 0 0.35em 0.35em 0;
+  white-space: nowrap;
+}
+
+.reveal .pill b { color: var(--esp-red); font-weight: 700; }
+
+/* Big "3 commands" statement ------------------------------------------ */
+
+.reveal .commands {
+  display: flex;
+  flex-direction: column;
+  gap: 0.28em;
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 0.62em;
+  line-height: 1.35;
+}
+
+.reveal .commands .line { display: flex; align-items: baseline; gap: 0.7em; }
+.reveal .commands .n {
+  color: var(--esp-text-faint);
+  font-size: 0.62em;
+  width: 1.4em;
+  flex: 0 0 auto;
+}
+.reveal .commands .c { color: var(--esp-text); }
+.reveal .commands .c b { color: var(--esp-red); font-weight: 700; }
+
+/* Stat / number tiles -------------------------------------------------- */
+
+.reveal .stat { display: flex; flex-direction: column; gap: 0.15em; }
+.reveal .stat .num {
+  font-size: 1.5em;
+  font-weight: 800;
+  color: var(--esp-red);
+  line-height: 1;
+  letter-spacing: -0.03em;
+}
+.reveal .stat .lbl {
+  font-size: 0.4em;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--esp-text-faint);
+}
+
+/* Two-column compare (esp-idf vs Rust) --------------------------------- */
+
+.reveal .versus {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 1.2em;
+  align-items: stretch;
+}
+
+.reveal .versus .divider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.4em;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  color: var(--esp-red);
+  white-space: nowrap;
+}
+
+/* Title slide ----------------------------------------------------------- */
+/* Alignment is handled by Reveal's `center: true`; these slides only carry
+   their own typographic treatment. No display/align overrides here — Reveal
+   sets `display` on the section at runtime and would override them. */
+
+.reveal .title-slide h1 {
+  font-size: 1.9em;
+  margin: 0;
+  letter-spacing: -0.035em;
+}
+
+.reveal .title-slide .subtitle {
+  font-size: 0.56em;
+  color: var(--esp-text-dim);
+  margin: 0.45em 0 0;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  line-height: 1.5;
+}
+
+.reveal .title-slide .rust-accent { color: var(--esp-red); }
+
+/* Section divider -------------------------------------------------------- */
+
+.reveal .section-slide .num-big {
+  font-size: 3.4em;
+  font-weight: 800;
+  color: transparent;
+  -webkit-text-stroke: 2px var(--esp-red);
+  line-height: 1;
+  margin-bottom: 0.25em;
+  letter-spacing: -0.04em;
+}
+
+.reveal .section-slide h2 { font-size: 1.2em; margin: 0; }
+
+.reveal .section-slide .section-sub {
+  font-size: 0.55em;
+  color: var(--esp-text-dim);
+  margin: 0.5em 0 0;
+  max-width: 20em;
+}
+
+/* Progress bar ------------------------------------------------------------ */
+
+.reveal .progress {
+  color: var(--esp-red);
+  height: 3px;
+}
+
+.reveal .progress:after {
+  background: var(--esp-red);
+}
+
+/* Controls --------------------------------------------------------------- */
+
+.reveal .controls { color: var(--esp-red); }
+.reveal .slide-number { background: transparent; }
+
+/* Overview / presenter view tweaks ---------------------------------------- */
+
+.reveal .overview .slide-content { font-size: 22px; }
+.reveal .slides section.presenting .card { border-color: var(--esp-red); }
+
+/* Print ------------------------------------------------------------------- */
+
+@media print {
+  .reveal .footer-logo { display: none; }
+}
