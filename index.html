@@ -44,7 +44,7 @@
     </div>
     <div class="card">
       <span class="tag">The honest caveat</span>
-      <h3>It trails the C SDK slightly</h3>
+      <h3>It is a little bit behind the C SDK.</h3>
       <p class="card-body">ESP-IDF is the reference SDK. It reaches new chips and new peripheral
       features first, and it has the deepest example coverage.</p>
     </div>
@@ -87,7 +87,7 @@
 <section>
   <span class="eyebrow">Why you'd choose it</span>
   <h2>What you actually get</h2>
-  <div class="cols-3" style="margin-top:0.8em">
+  <div class="cols-3" style="margin-top:0.8em;grid-template-columns:repeat(4,1fr);gap:1em">
     <div class="card">
       <span class="tag">Safety</span>
       <h3>No memory bugs</h3>
@@ -106,6 +106,11 @@
       <p class="card-body">Embassy gives you <code>async</code> on a microcontroller, so Wi-Fi and
       sensors stop fighting each other.</p>
     </div>
+    <div class="card">
+      <span class="tag">Simulation</span>
+      <h3>Wokwi, built in</h3>
+      <p class="card-body">Works seamlessly with the Wokwi simulator — from the CLI and from VS Code.</p>
+    </div>
   </div>
   <p style="margin-top:0.9em;font-size:0.46em;color:var(--esp-text-faint)">
     Plus: the type system catches a whole class of logic errors at compile time, and the crate ecosystem
@@ -115,6 +120,7 @@
     Three benefits, one breath each. For the C people: you stop owning the memory-safety argument. For
     the Rust people: Cargo plus a real crate ecosystem full of no_std ready linraries for lot of sensors and other parts.
     And async is the one that actually changes how you write firmware — Wi-Fi and sensor work stop being callbacks.
+    Bonus: it all works seamlessly with the Wokwi simulator, from the CLI and from VS Code — no board needed to try it.
   </aside>
 </section>
 
@@ -138,7 +144,7 @@
     Assume <code>rustup</code> is installed. If it isn't, <a href="https://rustup.rs" target="_blank">rustup.rs</a>
     is one command — but from here on, Rust just works.
   </p>
-  <div class="cols" style="margin-top:0.85em">
+  <div class="cols" style="margin-top:0.85em;align-items:stretch">
     <div class="card accent">
       <span class="tag">RISC-V parts</span>
       <h3>Mainline Rust — you're done</h3>
@@ -150,6 +156,9 @@
       <h3>You need <a href="https://github.com/esp-rs/espup" target="_blank">espup</a></h3>
       <p class="card-body">Xtensa has no upstream LLVM backend, so espup builds and installs the
       toolchain for you.</p>
+      <div style="margin-top:0.1em;font-size:1.1em">
+        <span class="pill" style="margin-bottom:0">ESP32</span><span class="pill" style="margin-bottom:0">ESP32-S2</span><span class="pill" style="margin-bottom:0">ESP32-S3</span>
+      </div>
     </div>
   </div>
   <pre style="margin-top:0.8em"><code><span class="cmd">$</span> cargo install espup --locked
@@ -167,17 +176,17 @@
   <span class="eyebrow">Step 2 · Flashing</span>
   <h2>Getting code onto the chip</h2>
   <div class="cols" style="margin-top:0.7em">
-    <div class="card">
-      <span class="tag">Option A</span>
-      <h3>esptool.py</h3>
-      <p class="card-body">The one that ships with ESP-IDF. If you already have IDF installed, it is
-      right there and it works fine.</p>
-    </div>
     <div class="card accent">
-      <span class="tag">Option B</span>
+      <span class="tag">Option A</span>
       <h3>cargo-espflash</h3>
       <p class="card-body">Pure Rust, lives next to <code>cargo build</code>, and gives you a
       monitor as well as a flasher.</p>
+    </div>
+    <div class="card">
+      <span class="tag">Option B</span>
+      <h3>esptool.py</h3>
+      <p class="card-body">The one that ships with ESP-IDF. If you already have IDF installed, it is
+      right there and it works fine.</p>
     </div>
   </div>
   <pre style="margin-top:0.85em"><code><span class="cmd">$</span> cargo install cargo-espflash --locked
@@ -185,9 +194,9 @@
 <span class="cmt"># board-info, monitor, erase, read-flash, save-image — the whole serial toolchain</span>
 <span class="cmd">$</span> cargo espflash board-info</code></pre>
   <aside class="notes">
-    Both are legitimate. If IDF is already on your machine, esptool is right there — no reason to
-    change. But cargo-espflash is nicer because it lives in the same mental model as cargo build,
-    and board-info is the first thing to run when unsure what board you are holding.
+    Lead with cargo-espflash: it lives in the same mental model as cargo build, and board-info is
+    the first thing to run when unsure what board you are holding. Both are legitimate though — if
+    IDF is already on your machine, esptool is right there and there is no reason to change.
   </aside>
 </section>
 
