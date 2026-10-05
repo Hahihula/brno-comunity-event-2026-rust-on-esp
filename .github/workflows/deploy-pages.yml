@@ -45,7 +45,7 @@ jobs:
           mkdir -p _site
           # Only what the browser needs. Paths stay relative, so the deck also
           # works under a project subpath (/<repo>/).
-          cp -R index.html assets css reveal.js _site/
+          cp -R index.html en.html cs.html assets css reveal.js _site/
           # Artifact uploads bypass Jekyll, but .nojekyll also keeps the site
           # working if Pages is ever switched to "deploy from a branch".
           touch _site/.nojekyll
