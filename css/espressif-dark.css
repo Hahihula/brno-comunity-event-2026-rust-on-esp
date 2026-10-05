@@ -426,3 +426,25 @@
 @media print {
   .reveal .footer-logo { display: none; }
 }
+
+/* Language switch ------------------------------------------------------ */
+
+#lang-switch {
+  position: fixed;
+  right: 24px;
+  top: 20px;
+  z-index: 30;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  color: var(--esp-text-dim);
+  border: 1px solid var(--esp-border);
+  background: var(--esp-surface);
+  border-radius: 999px;
+  padding: 0.3em 0.9em;
+  text-decoration: none;
+  opacity: 0.8;
+}
+#lang-switch:hover { color: var(--esp-white); border-color: var(--esp-red); opacity: 1; }
+
+@media print { #lang-switch { display: none; } }

@@ -1,0 +1,321 @@
+```html
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Rust na ESP — plnohodnotná podpora od Espressif</title>
+<meta name="description" content="Podpora Rustu pro čipy Espressif a rychlý start: espup, espflash, esp-generate.">
+<link rel="icon" type="image/svg+xml" href="assets/espressif-mark.svg">
+
+<link rel="stylesheet" href="reveal.js/dist/reset.css">
+<link rel="stylesheet" href="reveal.js/dist/reveal.css">
+<link rel="stylesheet" href="css/espressif-dark.css">
+</head>
+<body>
+<div class="reveal">
+<div class="slides">
+
+<!-- ══════════════════════════════════ 1 · TITULEK ══════════════════════════════════ -->
+<section class="title-slide">
+  <img src="assets/espressif-logo-on-black.svg" alt="Espressif" style="height:46px;margin-bottom:1.1em">
+  <h1><span class="rust-accent">Rust</span> na ESP</h1>
+  <p class="subtitle">Plnohodnotná podpora od Espressif —<br>a tři příkazy od nuly k blikající LED</p>
+  <p style="margin-top:1.15em"><span class="pill">github.com/esp-rs</span></p>
+  <aside class="notes">
+    Než začneme, krátké shrnutí. Dva sliby: zaprvé, Espressif bere Rust vážně, není to jen hobby projekt.
+    Zadruhé, na konci budete znát přesně tři příkazy, které vás dovedou od ničeho k běžícímu firmwaru.
+    Nic víc. Pokud si máte zapamatovat jediný snímek, zapamatujte si ten poslední.
+  </aside>
+</section>
+
+<!-- ══════════════════════════════════ 2 · STAV ══════════════════════════════════ -->
+<section>
+  <span class="eyebrow">Aktuální stav</span>
+  <h2>Rust je plnohodnotnou volbou</h2>
+  <div class="cols" style="margin-top:0.9em">
+    <div class="stack">
+      <p style="font-size:0.56em">Není to komunitní experiment ani obálka kolem C. Espressif
+      oficiálně podporuje Rust jako plnohodnotný vývojový jazyk vedle ESP-IDF.</p>
+      <ul style="font-size:0.52em">
+        <li>Vlastní HAL, vlastní ovladače, vlastní nástroje — vytvořené a udržované pro čipy ESP</li>
+        <li>Stabilní API, ne předverze v1</li>
+        <li>Dokumentované, verzované a vydávané spolu s čipy</li>
+      </ul>
+    </div>
+    <div class="card">
+      <span class="tag">Upřímné upozornění</span>
+      <h3>Je mírně pozadu za C SDK.</h3>
+      <p class="card-body">ESP-IDF je referenční SDK. Nové čipy a funkce periferií dostává jako první
+      a nabízí nejširší pokrytí příklady.</p>
+    </div>
+  </div>
+  <aside class="notes">
+    Řekněme si toto upozornění nahlas — ESP-IDF je referenční SDK a k novému čipu
+    nebo úplně nové periferii se vždy dostane jako první. Rust je trochu za touto hranicí.
+  </aside>
+</section>
+
+<!-- ══════════════════════════════════ 3 · VOLBA ══════════════════════════════════ -->
+<section>
+  <span class="eyebrow">Tak který?</span>
+  <h2>Zvolte jednoduchou odpověď</h2>
+  <div class="versus" style="margin-top:0.7em">
+    <div class="card">
+      <span class="tag">Nejnovější funkce</span>
+      <h3>ESP-IDF (C)</h3>
+      <p class="card-body">Potřebujete periferii nebo funkci čipu, která vyšla minulý týden, nebo
+      portujete middleware od dodavatele. Začněte zde.</p>
+    </div>
+    <div class="divider">NEBO</div>
+    <div class="card accent">
+      <span class="tag">Všechno ostatní</span>
+      <h3>Rust</h3>
+      <p class="card-body">Pro naprostou většinu projektů je Rust jednoduše lepší nástroj —
+      a už dnes je skutečně připravený pro produkční použití.</p>
+    </div>
+  </div>
+  <p style="margin-top:0.9em;font-size:0.5em;color:var(--esp-text-dim)">
+    Rozdíl se měří v měsících, ne v letech — a s každým vydáním čipu se zmenšuje.
+  </p>
+  <aside class="notes">
+    Praktické pravidlo: pokud potřebujete funkci z datasheetu vydaného v tomto čtvrtletí, použijte ESP-IDF.
+    Pro všechno ostatní Rust není kompromis — je to lepší výchozí volba.
+  </aside>
+</section>
+
+<!-- ══════════════════════════════════ 4 · VÝHODY ══════════════════════════════════ -->
+<section>
+  <span class="eyebrow">Proč si jej vybrat</span>
+  <h2>Co skutečně získáte</h2>
+  <div class="cols-3" style="margin-top:0.8em;grid-template-columns:repeat(4,1fr);gap:1em">
+    <div class="card">
+        <span class="tag">Bezpečnost</span>
+        <h3>Žádné chyby s pamětí</h3>
+        <p class="card-body">Vlastnictví (ownership) a borrow checking eliminují přetečení bufferů a use-after-free
+        chyby, které dominují embedded CVE.</p>
+    </div>
+    <div class="card">
+        <span class="tag">Nástroje</span>
+        <h3>Cargo odvede práci</h3>
+        <p class="card-body">Závislosti, buildy, testy, dokumentace, linting i cross-kompilace — jeden
+        nástroj, žádné ručně psané Makefiles.</p>
+    </div>
+    <div class="card">
+      <span class="tag">Škálování</span>
+      <h3>Async, který sedí</h3>
+      <p class="card-body">Embassy přináší <code>async</code> do mikrokontroléru, takže Wi-Fi a
+      senzory si přestanou překážet.</p>
+    </div>
+    <div class="card">
+      <span class="tag">Simulace</span>
+      <h3>Wokwi vestavěný</h3>
+      <p class="card-body">Funguje bez problémů se simulátorem Wokwi — z CLI i z VS Code.</p>
+    </div>
+  </div>
+  <p style="margin-top:0.9em;font-size:0.46em;color:var(--esp-text-faint)">
+      Navíc: systém typů zachytí celou řadu logických chyb už při kompilaci a ekosystém crate balíčků
+      je sdílený se zbytkem světa Rustu — není třeba ho pro každého vendora vynalézat znovu.
+  </p>
+  <aside class="notes">
+    Tři výhody, každá jedním dechem. Pro C vývojáře: už nemusíte řešit argument bezpečnosti paměti.
+    Pro Rust vývojáře: Cargo a skutečný ekosystém crate plný knihoven připravených pro no_std,
+    pro spoustu senzorů a dalších komponent.
+    A async je to, co skutečně mění způsob psaní firmwaru — Wi-Fi a práce se senzory přestanou být callbacky.
+    Bonus: vše funguje hladce se simulátorem Wokwi, z CLI i z VS Code — pro vyzkoušení nepotřebujete desku.
+  </aside>
+</section>
+
+<!-- ══════════════════════════════════ 5 · DĚLICÍ SNÍMEK ══════════════════════════════════ -->
+<section class="section-slide">
+  <div class="num-big">02</div>
+  <h2>Začínáme</h2>
+  <p class="section-sub">Tři kroky: toolchain, flasher, generátor projektu.</p>
+  <aside class="notes">
+    Jsme v polovině.
+    Všechno dosud byl kontext, všechno odteď si můžete dnes večer napsat do terminálu.
+    Tři části — toolchain, flasher a generátor.
+  </aside>
+</section>
+
+<!-- ══════════════════════════════════ 6 · TOOLCHAIN ══════════════════════════════════ -->
+<section>
+  <span class="eyebrow">Krok 1 · Toolchain</span>
+  <h2>Tu těžkou část už máte</h2>
+  <p style="font-size:0.52em;color:var(--esp-text-dim)">
+    Předpokládejme, že máte nainstalovaný <code>rustup</code>. Pokud ne, <a href="https://rustup.rs" target="_blank">rustup.rs</a>
+    je jediný příkaz — ale odtud už Rust prostě funguje.
+  </p>
+  <div class="cols" style="margin-top:0.85em;align-items:stretch">
+    <div class="card accent">
+      <span class="tag">RISC-V čipy</span>
+      <h3>Standardní Rust — hotovo</h3>
+      <p class="card-body">Řady C, H a P používají standardní RISC-V. Cílí na ně běžný stabilní
+      Rust toolchain. Není třeba nic dalšího instalovat.</p>
+    </div>
+    <div class="card">
+      <span class="tag">Xtensa čipy</span>
+      <h3>Potřebujete <a href="https://github.com/esp-rs/espup" target="_blank">espup</a></h3>
+      <p class="card-body">Xtensa nemá upstream LLVM backend, proto vám espup toolchain sestaví
+      a nainstaluje.</p>
+      <div style="margin-top:0.1em;font-size:1.1em">
+        <span class="pill" style="margin-bottom:0">ESP32</span><span class="pill" style="margin-bottom:0">ESP32-S2</span><span class="pill" style="margin-bottom:0">ESP32-S3</span>
+      </div>
+    </div>
+  </div>
+  <pre style="margin-top:0.8em"><code><span class="cmd">$</span> cargo install espup --locked
+<span class="cmd">$</span> espup install
+<span class="cmd">$</span> <span class="cmt"># poté v každém novém shellu:</span> . $HOME/export-esp.sh</code></pre>
+  <aside class="notes">
+    Toto je zdaleka nejčastější otázka, proto přesná odpověď. RISC-V je standardní, takže jej stabilní Rust
+    zvládne bez čehokoli navíc. Xtensa není v upstreamu, proto espup instaluje
+    toolchain vytvořený přímo pro něj. espup udělá vše — stačí jej spustit.
+  </aside>
+</section>
+
+<!-- ══════════════════════════════════ 7 · FLASHOVÁNÍ ══════════════════════════════════ -->
+<section>
+  <span class="eyebrow">Krok 2 · Flashování</span>
+  <h2>Jak dostat kód do čipu</h2>
+  <div class="cols" style="margin-top:0.7em">
+    <div class="card accent">
+      <span class="tag">Možnost A</span>
+      <h3>cargo-espflash</h3>
+      <p class="card-body">Čistý Rust, funguje vedle <code>cargo build</code> a kromě flasheru
+      poskytuje také monitor.</p>
+    </div>
+    <div class="card">
+      <span class="tag">Možnost B</span>
+      <h3>esptool.py</h3>
+      <p class="card-body">Nástroj dodávaný s ESP-IDF. Pokud už máte IDF nainstalované, je
+      k dispozici a funguje bez problémů.</p>
+    </div>
+  </div>
+  <pre style="margin-top:0.85em"><code><span class="cmd">$</span> cargo install cargo-espflash --locked
+
+<span class="cmt"># board-info, monitor, erase, read-flash, save-image — kompletní sada sériových nástrojů</span>
+<span class="cmd">$</span> cargo espflash board-info</code></pre>
+  <aside class="notes">
+    Začněte s cargo-espflash: zapadá do stejného mentálního modelu jako cargo build a board-info je
+    první příkaz, který spusťte, pokud si nejste jistí, jakou desku držíte v ruce. Obě možnosti jsou legitimní —
+    pokud už máte na počítači IDF, esptool je po ruce a není důvod jej měnit.
+  </aside>
+</section>
+
+<!-- ══════════════════════════════════ 8 · GENEROVÁNÍ ══════════════════════════════════ -->
+<section>
+  <span class="eyebrow">Krok 3 · Projekt</span>
+  <h2>esp-generate vytvoří kostru projektu</h2>
+  <p style="font-size:0.52em;color:var(--esp-text-dim)">
+      Terminálový průvodce se zeptá na pár otázek a vytvoří reálný,
+      kompatibilní projekt.
+  </p>
+  <pre style="margin-top:0.7em"><code><span class="cmd">$</span> cargo install esp-generate --locked
+<span class="cmd">$</span> esp-generate</code></pre>
+  <div class="cols-3" style="margin-top:0.7em">
+    <div class="card">
+      <h3>Sync nebo async</h3>
+      <p class="card-body">Běžný blokující kód, nebo <code>embassy</code> <code>async</code> — volba je na vás.</p>
+    </div>
+    <div class="card">
+      <h3>Cílový čip</h3>
+      <p class="card-body">Libovolný podporovaný ESP SoC vybraný ze seznamu.</p>
+    </div>
+    <div class="card accent">
+      <h3>Inicializace Wi-Fi</h3>
+      <p class="card-body">Volitelné zprovoznění rádia, připravené od začátku.</p>
+    </div>
+  </div>
+  <aside class="notes">
+    Upřesněme si to: stále provádíte cross-kompilaci a nastavení projektu tak, aby Cargo přesně vědělo,
+    co má dělat, může být nepříjemné. esp-generate to vyřeší za vás. Jeden příkaz a máte kompilovatelný,
+    flashovatelný projekt se správným target triple a už zapojeným HALem. Sync nebo async je volba v menu
+    a inicializace Wi-Fi je zaškrtávací políčko. Pokud chcete skriptování, existuje headless režim s přepínači
+    -o — takže i vy, AI agenti, se rychle naučíte, jak jej používat.
+  </aside>
+</section>
+
+<!-- ══════════════════════════════════ 9 · BUILD + FLASH ══════════════════════════════════ -->
+<section>
+  <span class="eyebrow">Krok 4 · Nasaďte jej</span>
+  <h2>Sestavit, flashnout, hotovo</h2>
+  <pre><code><span class="cmd">$</span> cargo build --release
+<span class="cmd">$</span> cargo espflash flash --release
+<span class="cmd">$</span> cargo espflash monitor</code></pre>
+  <p style="margin-top:0.9em;font-size:0.5em;color:var(--esp-text-dim)">
+    Stejná slovesa, která už používáte pro každý jiný Rust projekt — jen míří na mikrokontrolér
+    namísto serveru.
+  </p>
+  <aside class="notes">
+    Tím se kruh uzavírá. Cargo build, flash, monitor. Žádný Makefile, žádné CMake, žádný samostatný
+    flashovací skript, žádný druhý toolchain, který se musíte naučit. Pokud jste už někdy psali v Rustu,
+    už víte, jak toto všechno dělat — a přesně o to jde.
+  </aside>
+</section>
+
+<!-- ══════════════════════════════════ 10 · SHRNUTÍ ══════════════════════════════════ -->
+<section>
+  <span class="eyebrow">Celý postup</span>
+  <h2>Tři příkazy</h2>
+  <div class="commands" style="margin-top:0.8em">
+    <div class="line"><span class="n">1</span><span class="c"><b>esp-generate</b> &nbsp;<span style="color:var(--esp-text-faint)">&nbsp;← vytvoří kostru projektu</span></span></div>
+    <div class="line"><span class="n">2</span><span class="c"><b>cargo build</b> &nbsp;<span style="color:var(--esp-text-faint)">&nbsp;← zkompiluje firmware</span></span></div>
+    <div class="line"><span class="n">3</span><span class="c"><b>cargo espflash flash</b> &nbsp;<span style="color:var(--esp-text-faint)">&nbsp;← zapíše jej do čipu</span></span></div>
+  </div>
+  <p style="margin-top:1.1em;font-size:0.54em;color:var(--esp-text-dim)">
+    Rust na ESP je tak snadný jako <span style="color:var(--esp-white)">esp-generate</span>,
+    <span style="color:var(--esp-white)">cargo build</span> a
+    <span style="color:var(--esp-white)">cargo espflash flash</span>.
+  </p>
+  <p style="margin-top:0.9em;font-size:0.6em">
+    <span style="color:var(--esp-white)">Pokud si máte něco zapamatovat, zapamatujte si tento snímek.</span><br>
+    <span style="color:var(--esp-red)">Děkuji za pozornost — dotazy jsou vítány.</span>
+  </p>
+  <aside class="notes">
+    Pokud už je toolchain nainstalovaný, celý proces začátku práce tvoří tyto tři příkazy.
+    To je celé sdělení. Jediná věc, kterou si odnést, je tento snímek.
+  </aside>
+</section>
+
+</div>
+</div>
+
+<a id="lang-switch" href="en.html" title="Switch to English">EN</a>
+<img class="footer-logo" src="assets/espressif-mark.svg" alt="">
+
+<script src="reveal.js/dist/reveal.js"></script>
+<script src="reveal.js/plugin/notes/notes.js"></script>
+<script src="reveal.js/plugin/search/search.js"></script>
+<script src="reveal.js/plugin/zoom/zoom.js"></script>
+<script>
+  // POZNÁMKA: Plugin pro zvýraznění syntaxe se záměrně nenačítá. Bloky kódu v této
+  // prezentaci jsou stylované ručně pomocí spanů .cmd / .cmt a highlightBlock()
+  // by tento markup escapoval a vykreslil značky jako doslovný text.
+  Reveal.initialize({
+    width: 1280,
+    height: 720,
+    margin: 0.06,
+    minScale: 0.2,
+    maxScale: 1.6,
+    hash: true,
+    slideNumber: 'c/t',
+    transition: 'slide',
+    transitionSpeed: 'fast',
+    backgroundTransition: 'fade',
+    center: true,
+    pdfSeparateFragments: false,
+    plugins: [ RevealNotes, RevealSearch, RevealZoom ]
+  });
+</script>
+<script>
+  // Přepínač jazyka: přejde na stejný snímek v druhé prezentaci.
+  (function () {
+    var a = document.getElementById('lang-switch');
+    function sync() { a.href = 'en.html' + location.hash; }
+    Reveal.on('ready', sync); Reveal.on('slidechanged', sync);
+    window.addEventListener('hashchange', sync);
+  })();
+</script>
+</body>
+</html>
+```
